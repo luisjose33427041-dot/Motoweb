@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mikarol Motos - Directorio Cúa</title>
+    <style>
+        :root { --y: #ffcc00; --b: #121212; }
+        body { background: var(--b); color: white; font-family: sans-serif; margin: 0; padding: 15px; }
+        header { text-align: center; padding: 20px 0; border-bottom: 2px solid var(--y); }
+        #search { width: 100%; padding: 15px; border-radius: 25px; border: none; background: #222; color: white; margin: 20px 0; box-sizing: border-box; border: 1px solid #333; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .card { background: #1e1e1e; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+        .info { padding: 15px; }
+        .name { color: var(--y); font-weight: bold; font-size: 1.2em; }
+        .btn { display: block; text-align: center; background: #25d366; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="margin:0">MIKAROL <span style="color:white">MOTOS</span></h1>
+    </header>
+
+    <input type="text" id="search" placeholder="¿A dónde vas? Busca tu ruta..." onkeyup="filtrar()">
+
+    <div class="grid" id="contenedor"></div>
+
+    <script>
+        async function cargar() {
+            const res = await fetch("https://motoweb-a6fdd-default-rtdb.firebaseio.com/motos.json");
+            const datos = await res.json();
+            const con = document.getElementById('contenedor');
+            con.innerHTML = "";
+
+            if(datos) {
+                Object.values(datos).forEach(m => {
+                    con.innerHTML += `
+                        <div class="card" data-info="${m.nombre} ${m.ruta}">
+                            <img src="${m.foto}" style="width:100%; height:180px; object-fit:cover;">
+                            <div class="info">
+                                <div class="name">${m.nombre} ✔</div>
+                                <div style="color:#aaa; font-size:0.9em; margin:5px 0;">📍 ${m.ruta}</div>
+                                <a href="https://wa.me/58${m.telefono}" class="btn">Pedir Carrera</a>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                con.innerHTML = "<p style='text-align:center; width:100%; color:#666;'>No hay motos registradas.</p>";
+            }
+        }
+
+        function filtrar() {
+            let b = document.getElementById('search').value.toLowerCase();
+            let cards = document.getElementsByClassName('card');
+            for(let c of cards) {
+                c.style.display = c.getAttribute('data-info').toLowerCase().includes(b) ? "" : "none";
+            }
+        }
+        cargar();
+    </script>
+</body>
+</html>
