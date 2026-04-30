@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motos cua - Directorio Cúa</title>
+    <title>Motos Cúa - Directorio de Confianza</title>
     <style>
         :root { 
             --y: #ffcc00; 
@@ -23,7 +23,7 @@
             border-bottom: 2px solid var(--y); 
             margin-bottom: 20px;
         }
-        h1 { margin: 0; letter-spacing: 1px; }
+        h1 { margin: 0; letter-spacing: 1px; text-transform: uppercase; }
         #search { 
             width: 100%; 
             padding: 15px; 
@@ -35,10 +35,7 @@
             box-sizing: border-box; 
             font-size: 16px;
         }
-        #search:focus {
-            outline: 2px solid var(--y);
-            border: none;
-        }
+        #search:focus { outline: 2px solid var(--y); border: none; }
         .grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -51,18 +48,20 @@
             border-radius: 15px; 
             overflow: hidden; 
             border: 1px solid #333; 
-            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
         }
-        .card:hover { transform: scale(1.02); }
         .card-img { 
             width: 100%; 
-            height: 200px; 
+            height: 180px; 
             object-fit: cover; 
             background: #2a2a2a;
         }
-        .info { padding: 15px; }
-        .name { color: var(--y); font-weight: bold; font-size: 1.3em; margin-bottom: 5px; }
-        .route { color: #aaa; font-size: 0.95em; margin-bottom: 15px; display: flex; align-items: center; }
+        .info { padding: 15px; flex-grow: 1; }
+        .name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .name { color: var(--y); font-weight: bold; font-size: 1.2em; }
+        .percentage { background: var(--y); color: black; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 0.8em; }
+        .route { color: #aaa; font-size: 0.9em; margin-bottom: 15px; }
         .btn { 
             display: block; 
             text-align: center; 
@@ -72,32 +71,45 @@
             padding: 12px; 
             border-radius: 10px; 
             font-weight: bold; 
-            font-size: 1.1em;
-            transition: background 0.3s;
         }
-        .btn:hover { background: #128c7e; }
+        .votes { 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px; 
+            background: #252525; 
+            border-top: 1px solid #333; 
+        }
+        .vote-btn { 
+            background: none; 
+            border: none; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
         #loading { text-align: center; color: #666; margin-top: 50px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>MIKAROL <span style="color:white">MOTOS</span></h1>
-        <p style="color: #888; font-size: 0.9em; margin-top: 5px;">Directorio de Confianza - Cúa, Miranda</p>
+        <h1>MOTOS <span style="color:white">CÚA</span></h1>
+        <p style="color: #888; font-size: 0.9em; margin-top: 5px;">Mikarol Services - Seguridad Garantizada</p>
     </header>
 
-    <input type="text" id="search" placeholder="¿A dónde vas? Busca tu ruta o zona..." onkeyup="filtrar()">
+    <input type="text" id="search" placeholder="¿A dónde vas? Busca tu ruta..." onkeyup="filtrar()">
 
-    <div id="loading">Cargando motorizados...</div>
+    <div id="loading">Cargando unidades...</div>
     <div class="grid" id="contenedor"></div>
 
     <script>
-        // URL de tu base de datos Firebase
-        const API_URL = "https://motoweb-a6fdd-default-rtdb.firebaseio.com/motos.json";
+        const API_URL = "https://motoweb-a6fdd-default-rtdb.firebaseio.com/motos";
 
         async function cargarMotos() {
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(`${API_URL}.json`);
                 const datos = await res.json();
                 const contenedor = document.getElementById('contenedor');
                 const loading = document.getElementById('loading');
@@ -106,46 +118,58 @@
 
                 if (datos) {
                     loading.style.display = "none";
-                    // Firebase devuelve un objeto, recorremos sus propiedades
                     Object.keys(datos).forEach(id => {
                         const m = datos[id];
+                        const likes = m.likes || 0;
+                        const dislikes = m.dislikes || 0;
+                        const total = likes + dislikes;
+                        const porc = total === 0 ? 0 : Math.round((likes / total) * 100);
+
                         contenedor.innerHTML += `
                             <div class="card" data-info="${m.nombre} ${m.ruta}">
-                                <img src="${m.foto || 'https://via.placeholder.com/300x200?text=Mikarol+Motos'}" 
-                                     class="card-img" 
-                                     onerror="this.src='https://via.placeholder.com/300x200?text=Mikarol+Motos'">
+                                <img src="${m.foto || 'https://via.placeholder.com/300x200?text=Motos+Cua'}" 
+                                     class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=Motos+Cua'">
                                 <div class="info">
-                                    <div class="name">${m.nombre} <span style="color:#25d366; font-size: 0.7em;">✔</span></div>
+                                    <div class="name-row">
+                                        <div class="name">${m.nombre}</div>
+                                        <div class="percentage">${porc}% 👍</div>
+                                    </div>
                                     <div class="route">📍 ${m.ruta}</div>
-                                    <a href="https://wa.me/58${m.telefono.trim()}?text=Hola,%20vi%20tu%20perfil%20en%20MikarolMotos.%20¿Estás%20disponible?" 
-                                       class="btn" target="_blank">Pedir Carrera</a>
+                                    <a href="https://wa.me/58${m.telefono.trim()}" class="btn" target="_blank">Pedir Carrera</a>
+                                </div>
+                                <div class="votes">
+                                    <button class="vote-btn" onclick="votar('${id}', 'likes')">👍 ${likes}</button>
+                                    <button class="vote-btn" onclick="votar('${id}', 'dislikes')">👎 ${dislikes}</button>
                                 </div>
                             </div>`;
                     });
                 } else {
-                    loading.innerText = "No hay motorizados registrados en este momento.";
+                    loading.innerText = "No hay motorizados registrados.";
                 }
             } catch (error) {
-                console.error("Error cargando datos:", error);
-                document.getElementById('loading').innerText = "Error al conectar con la base de datos.";
+                document.getElementById('loading').innerText = "Error de conexión.";
             }
+        }
+
+        async function votar(id, tipo) {
+            const res = await fetch(`${API_URL}/${id}/${tipo}.json`);
+            const valorActual = await res.json() || 0;
+            await fetch(`${API_URL}/${id}/${tipo}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(valorActual + 1)
+            });
+            cargarMotos();
         }
 
         function filtrar() {
             let busqueda = document.getElementById('search').value.toLowerCase();
             let tarjetas = document.getElementsByClassName('card');
-            
             for (let t of tarjetas) {
                 let info = t.getAttribute('data-info').toLowerCase();
-                if (info.includes(busqueda)) {
-                    t.style.display = "";
-                } else {
-                    t.style.display = "none";
-                }
+                t.style.display = info.includes(busqueda) ? "" : "none";
             }
         }
 
-        // Iniciar carga al abrir la web
         cargarMotos();
     </script>
 </body>
